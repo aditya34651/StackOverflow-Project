@@ -18,7 +18,7 @@ def question(request:schemas.Questions, db:Session = Depends(get_db), current_us
     db.add(new_ques)
     db.commit()
     db.refresh(new_ques)
-    return new_ques   
+    return new_ques
 
 
 @router.delete('/Questions/{id}', status_code=status.HTTP_204_NO_CONTENT, tags=['Questions'])
