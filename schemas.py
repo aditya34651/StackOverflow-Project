@@ -22,7 +22,7 @@ class Answers(BaseModel):
 class User(BaseModel):
     fname:str = Query(..., max_length=50)  
     lname:str  = Query(..., max_length=50) 
-    email:str 
+    email:str = Query(..., regex="^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$", description="Invalid format of the email!")
     password:str=Query(..., max_length=12) 
     age:Optional[int] = Field(None)
     number:int = Field(..., lt=11)
@@ -34,6 +34,7 @@ class User2(BaseModel):
         orm_mode = True
 
 class ShowUsers(BaseModel):
+    id: str
     fname:str
     lname:str  
     Questions_asked:List[Questions]
