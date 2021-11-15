@@ -32,6 +32,15 @@ class Answers(Base):
     user_id=Column(Integer, ForeignKey('Users.id'))
     answer_owner = relationship("User", back_populates="Answers_posted")
 
+class Tags(Base):
+    __tablename__='Tags'
+    id = Column(Integer, primary_key=True, index=True)
+    tagname=Column(String)
+
+class Comments(Base):
+    __tablename__='Comments'
+    id = Column(Integer, primary_key=True, index=True)
+    description = Column(String) 
 
 
 

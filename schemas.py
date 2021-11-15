@@ -67,3 +67,24 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+
+class Tags(BaseModel):
+    tagname:str    
+
+
+class Comments(BaseModel):
+    description:str    
+
+class Showcomm(BaseModel):
+    description:str
+    id:str
+
+    class Config():
+        orm_mode=True
+
+class ShowTags(BaseModel):
+    tagname:str
+    id:str
+
+    class Config():
+        orm_mode=True

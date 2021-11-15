@@ -7,12 +7,12 @@ get_db = database.get_db
 router = APIRouter()
 
 
-@router.get('/Questions', response_model=List[schemas.ShowQues],tags=['Questions'])
+@router.get('/questions', response_model=List[schemas.ShowQues],tags=['Questions'])
 def all(db:Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     ques = db.query(models.Questions).all()
     return ques  
 
-@router.post('/Questions', status_code=status.HTTP_201_CREATED, tags=['Questions'])
+@router.post('/questions', status_code=status.HTTP_201_CREATED, tags=['Questions'])
 def question(request:schemas.Questions, db:Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     new_ques = models.Questions(title=request.title, body=request.body, user_id=request.user_id)
     db.add(new_ques)
@@ -21,7 +21,7 @@ def question(request:schemas.Questions, db:Session = Depends(get_db), current_us
     return new_ques
 
 
-@router.delete('/Questions/{id}', status_code=status.HTTP_204_NO_CONTENT, tags=['Questions'])
+@router.delete('/questions/{id}', status_code=status.HTTP_204_NO_CONTENT, tags=['Questions'])
 def destroy(id, db:Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     ques = db.query(models.Questions).filter(models.Questions.id == id)
     if not ques.first():
@@ -30,7 +30,7 @@ def destroy(id, db:Session = Depends(get_db), current_user: schemas.User = Depen
     db.commit()
     return 'Deleted'      
 
-@router.put('/Questions/{id}', status_code=status.HTTP_202_ACCEPTED,tags=['Questions'])
+@router.put('/questions/{id}', status_code=status.HTTP_202_ACCEPTED,tags=['Questions'])
 def update(id, request:schemas.Questions, db:Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     ques = db.query(models.Questions).filter(models.Questions.id == id)
     if not ques.first():
@@ -39,7 +39,7 @@ def update(id, request:schemas.Questions, db:Session = Depends(get_db), current_
     db.commit()
     return 'updated successfully'
 
-@router.get('/Questions/{id}', status_code=200, response_model=schemas.ShowQues,tags=['Questions'])
+@router.get('/questions/{id}', status_code=200, response_model=schemas.ShowQues,tags=['Questions'])
 def show(id, db:Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     ques = db.query(models.Questions).filter(models.Questions.id == id).first()  
     if not ques:
