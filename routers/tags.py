@@ -11,7 +11,7 @@ get_db = database.get_db
 
 
 
-@router.get('/tags', response_model=List[schemas.ShowTags],tags=['Tags'])
+@router.get('/my/tags', response_model=List[schemas.ShowTags],tags=['Tags'])
 def all(db:Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user), token:str=Depends(oauth2.oauth2_scheme)):
     try:
         payload=jwt.decode(token, JWTtoken.SECRET_KEY, algorithms=JWTtoken.ALGORITHM)
@@ -47,9 +47,15 @@ def Newtag(id, request:schemas.Tags, db:Session = Depends(get_db), current_user:
 
     tag_owner_id = user.id
     new_comm = models.Tags(tagname=request.tagname, tag_owner_id=tag_owner_id)
-    db.add(new_comm)
-    db.commit()
-    db.refresh(new_comm)
+    quer = db.query(models.Tags).filter(models.Tags.tagname == request.tagname).first()
+    if not quer:
+        db.add(new_comm)
+        db.commit()
+        db.refresh(new_comm)
+        return new_comm
+    else:
+        return {"message":"Tag already Exists"}    
+
 
 @router.delete('/tags/{id}', status_code=status.HTTP_204_NO_CONTENT, tags=['Tags'])
 def destroy(id, db:Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user), token:str = Depends(oauth2.oauth2_scheme)):
