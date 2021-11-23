@@ -11,6 +11,24 @@ router = APIRouter()
 @router.get('/questions', response_model=List[schemas.ShowQues],tags=['Questions'])
 def all(db:Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     ques = db.query(models.Questions).all()
+    return ques
+
+@router.get('/my/questions', response_model=List[schemas.ShowQues],tags=['Questions'])
+def all(db:Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user), token:str=Depends(oauth2.oauth2_scheme)):
+    try:
+        payload=jwt.decode(token, JWTtoken.SECRET_KEY, algorithms=JWTtoken.ALGORITHM)
+        username = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unable to verify credentials")
+        user = db.query(models.User).filter(models.User.email==username).first()    
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unable to verify credentials")
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unable to verify credentials")
+
+    user_id = user.id
+    ques = db.query(models.Questions).filter(models.Questions.user_id==user_id).all()
     return ques  
 
 @router.post('/questions', status_code=status.HTTP_201_CREATED, tags=['Questions'])

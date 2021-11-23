@@ -62,7 +62,7 @@ def DeleteAns(id, db:Session = Depends(get_db), current_user: schemas.User = Dep
 
 
 @router.put('/answers/{id}', status_code=status.HTTP_202_ACCEPTED, tags=['Answers'])
-def update(id, request: schemas.UpdateAns, db: Session= Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
+def update(id, request: schemas.UpdateAns, db: Session= Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user),token:str=Depends(oauth2.oauth2_scheme)):
     
     try:
         payload=jwt.decode(token, JWTtoken.SECRET_KEY, algorithms=JWTtoken.ALGORITHM)
@@ -90,6 +90,24 @@ def update(id, request: schemas.UpdateAns, db: Session= Depends(get_db), current
 @router.get('/answers', response_model=List[schemas.ShowAns], tags=['Answers'])
 def all(db:Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user)):
     ans = db.query(models.Answers).all()
+    return ans
+
+@router.get('/my/answers', response_model=List[schemas.ShowAns], tags=['Answers'])
+def all(db:Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user), token:str=Depends(oauth2.oauth2_scheme)):
+    try:
+        payload=jwt.decode(token, JWTtoken.SECRET_KEY, algorithms=JWTtoken.ALGORITHM)
+        username = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unable to verify credentials")
+        user = db.query(models.User).filter(models.User.email==username).first()    
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unable to verify credentials")
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unable to verify credentials")
+   
+    user_id = user.id   
+    ans = db.query(models.Answers).filter(models.Answers.user_id==user_id).all()
     return ans
 
 

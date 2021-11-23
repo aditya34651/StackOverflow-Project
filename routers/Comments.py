@@ -15,6 +15,24 @@ def GetAllComments(db:Session = Depends(get_db), current_user: schemas.User = De
     ques = db.query(models.Comments).all()
     return ques  
 
+@router.get('/my/comments', response_model=List[schemas.Showcomm],tags=['Comments'])
+def GetAllComments(db:Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user), token:str=Depends(oauth2.oauth2_scheme)):
+    try:
+        payload=jwt.decode(token, JWTtoken.SECRET_KEY, algorithms=JWTtoken.ALGORITHM)
+        username = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unable to verify credentials")
+        user = db.query(models.User).filter(models.User.email==username).first()    
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unable to verify credentials")
+
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unable to verify credentials")
+
+    user_id = user.id    
+    ques = db.query(models.Comments).filter(models.Comments.user_id==user.id).all()
+    return ques  
+
 @router.post('/question/{id}/comments', status_code=status.HTTP_201_CREATED, tags=['Comments'])
 def PostQuestionComment(id, request:schemas.Comments2, db:Session = Depends(get_db), current_user: schemas.User = Depends(oauth2.get_current_user),token:str=Depends(oauth2.oauth2_scheme)):
     try:
